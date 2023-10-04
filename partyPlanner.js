@@ -30,6 +30,7 @@ async function getParties() {
   }
 }
 console.log(state);
+
 function renderParty () {
     if(!state.parties.length){
         parties.innerHTML='There are no parties to plan :(';
@@ -57,12 +58,12 @@ function renderParty () {
 }
 //deleteButton function
 //needs to be async?
-function deleteButton (id) {
+async function deleteButton (id) {
     try {
-        const response = fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${API_URL}/${id}`, {
             method: "DELETE",
           });
-    render();
+render();
 }catch (error) {
     console.log(error);
   };
@@ -71,12 +72,18 @@ function deleteButton (id) {
 //create a party, then add it with addParty
 async function createParty(name, date, location, description) {
     try {
+    const isoDate = new Date(date + ':00').toISOString();
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, date, location, description }),
+        body: JSON.stringify({ name, date: isoDate, location, description }),
       });
+
       const json = await response.json();
+
+      if (json.error) {
+        throw new Error(`Failed to create party`);
+    }
      
       render();
     } catch (error) {
